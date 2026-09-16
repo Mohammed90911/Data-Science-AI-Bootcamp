@@ -42,11 +42,11 @@ class Seller:
             df.groupby("seller_id")
             .agg(
                 cost_of_reviews=("cost_of_reviews", "sum"),
-                share_of_one_star_reviews=(
+                share_of_one_stars=(
                     "review_score",
                     lambda x: (x == 1).mean(),
                 ),
-                share_of_five_star_reviews=(
+                share_of_five_stars=(
                     "review_score",
                     lambda x: (x == 5).mean(),
                 ),
@@ -71,7 +71,6 @@ class Seller:
         orders_df = self.data["orders"][
             ["order_id", "order_approved_at"]
         ].dropna()
-
         orders_df["order_approved_at"] = pd.to_datetime(
             orders_df["order_approved_at"]
         )
@@ -89,6 +88,9 @@ class Seller:
         sellers = sellers.merge(seller_months, on="seller_id", how="left")
         sellers["months_active"] = sellers["months_active"].fillna(1)
 
+        sellers["quantity_per_order"] = (
+            sellers["quantity"] / sellers["n_orders"]
+        )
         sellers["revenues"] = (sellers["sales"] * 0.10) + (
             sellers["months_active"] * 80
         )
